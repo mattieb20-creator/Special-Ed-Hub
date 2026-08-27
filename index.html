@@ -8,464 +8,152 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 </head>
 
-<body style="margin:0; font-family:Arial;">
+<body style="margin:0;">
 <div id="root"></div>
 
 <script>
 const { useState, useEffect } = React;
-2
- 
-3
-function App() {
-4
-const [data, setData] = useState([]);
-5
-const [search, setSearch] = useState("");
-6
-const [announcement, setAnnouncement] = useState("");
-7
- 
-8
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTypzAOjtcZhAkEtdPvP11wlC01FS0AvIT40CfYBmNCMk7GvWEagoCtltqCjAedq49ycAfuDi8ZrF5P/pub?output=csv";
-9
- 
-10
-useEffect(() => {
-11
-fetch(SHEET_URL)
-12
-.then(res => res.text())
-13
-.then(text => {
-14
-const rows = text.split("\n").slice(1);
-15
- 
-16
-const parsed = rows.map(row => {
-17
-const [category, name, url] = row.split(",");
-18
-return {
-19
-category: category?.trim(),
-20
-name: name?.trim(),
-21
-url: url?.trim()
-22
-};
-23
-}).filter(item => item.name);
-24
- 
-25
-const announce = parsed.find(item => item.category === "Announcement");
-26
- 
-27
-if (announce) {
-28
-setAnnouncement(announce.name);
-29
-}
-30
- 
-31
-const filtered = parsed.filter(
-32
-item => item.category !== "Announcement"
-33
-);
-34
- 
-35
-setData(filtered);
-36
-});
-37
-}, []);
-38
- 
-39
-const categories = [...new Set(data.map(d => d.category))];
-40
- 
-41
-const colors = {
-42
-"IEP Resources": "#dcfce7",
-43
-"Forms": "#fef9c3",
-44
-"Compliance": "#d1fae5",
-45
-"Student Support": "#fee2e2",
-46
-"Assessments": "#dbeafe",
-47
-"Staff Resources": "#ecfccb"
-48
-};
-49
- 
-50
-return React.createElement(
-51
-"div",
-52
-{
-53
-style: {
-54
-fontFamily: "Arial",
-55
-background: "#f3f4f6",
-56
-minHeight: "100vh"
-57
-}
-58
-},
-59
- 
-60
-// HEADER
-61
-React.createElement(
-62
-"div",
-63
-{
-64
-style: {
-65
-background: "#166534",
-66
-color: "white",
-67
-padding: "16px 20px",
-68
-display: "flex",
-69
-justifyContent: "space-between",
-70
-alignItems: "center",
-71
-boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
-72
-}
-73
-},
-74
- 
-75
-React.createElement(
-76
-"div",
-77
-null,
-78
-React.createElement(
-79
-"h1",
-80
-{
-81
-style: {
-82
-margin: 0,
-83
-fontSize: "20px"
-84
-}
-85
-},
-86
-"Special Ed Hub"
-87
-),
-88
- 
-89
-React.createElement(
-90
-"div",
-91
-{
-92
-style: {
-93
-fontSize: "13px",
-94
-opacity: 0.9
-95
-}
-96
-},
-97
-"Special Education Department Resource Portal"
-98
-)
-99
-),
-100
- 
-101
-React.createElement(
-102
-"div",
-103
-{
-104
-style: {
-105
-fontSize: "13px",
-106
-opacity: 0.8
-107
-}
-108
-},
-109
-"TMMS"
-110
-)
-111
-),
-112
- 
-113
-React.createElement(
-114
-"div",
-115
-{
-116
-style: {
-117
-padding: "20px"
-118
-}
-119
-},
-120
- 
-121
-// ANNOUNCEMENT BAR
-122
-announcement &&
-123
-React.createElement(
-124
-"div",
-125
-{
-126
-style: {
-127
-background: "#15803d",
-128
-color: "white",
-129
-padding: "12px",
-130
-marginBottom: "20px",
-131
-borderRadius: "8px",
-132
-fontWeight: "bold"
-133
-}
-134
-},
-135
-"📢 " + announcement
-136
-),
-137
- 
-138
-// SEARCH
-139
-React.createElement("input", {
-140
-placeholder: "🔍 Search resources...",
-141
-value: search,
-142
-onChange: e => setSearch(e.target.value),
-143
-style: {
-144
-width: "100%",
-145
-padding: "10px",
-146
-marginBottom: "20px",
-147
-borderRadius: "8px",
-148
-border: "1px solid #ccc",
-149
-fontSize: "14px"
-150
-}
-151
-}),
-152
- 
-153
-// CARDS
-154
-React.createElement(
-155
-"div",
-156
-{
-157
-style: {
-158
-display: "grid",
-159
-gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-160
-gap: "16px"
-161
-}
-162
-},
-163
- 
-164
-categories.map(cat =>
-165
-React.createElement(
-166
-"div",
-167
-{
-168
-key: cat,
-169
-style: {
-170
-background: "white",
-171
-borderRadius: "12px",
-172
-padding: "15px",
-173
-boxShadow: "0 3px 8px rgba(0,0,0,0.1)"
-174
-}
-175
-},
-176
- 
-177
-React.createElement(
-178
-"div",
-179
-{
-180
-style: {
-181
-background: colors[cat] || "#e5e7eb",
-182
-padding: "8px",
-183
-borderRadius: "6px",
-184
-fontWeight: "bold",
-185
-marginBottom: "10px"
-186
-}
-187
-},
-188
-cat
-189
-),
-190
- 
-191
-data
-192
-.filter(
-193
-d =>
-194
-d.category === cat &&
-195
-d.name.toLowerCase().includes(search.toLowerCase())
-196
-)
-197
-.map((item, i) =>
-198
-React.createElement(
-199
-"button",
-200
-{
-201
-key: i,
-202
-onClick: () => window.open(item.url),
-203
-style: {
-204
-display: "block",
-205
-width: "100%",
-206
-marginBottom: "6px",
-207
-padding: "8px",
-208
-borderRadius: "6px",
-209
-border: "none",
-210
-background: "#ecfdf5",
-211
-cursor: "pointer",
-212
-textAlign: "left"
-213
-}
-214
-},
-215
-item.name
-216
-)
-217
-)
-218
-)
-219
-)
-220
-)
-221
-)
-222
-);
-223
-}
-224
- 
-225
-ReactDOM.createRoot(document.getElementById("root")).render(
-226
-React.createElement(App)
-227
-);
-</script>
 
-</body>
-</html>
+function App() {
+  const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTypzAOjtcZhAkEtdPvP11wlC01FS0AvIT40CfYBmNCMk7GvWEagoCtltqCjAedq49ycAfuDi8ZrF5P/pub?output=csv";
+
+  useEffect(() => {
+    fetch(SHEET_URL)
+      .then(response => response.text())
+      .then(text => {
+        const rows = text.split("\n").slice(1);
+
+        const parsed = rows.map(row => {
+          const cols = row.split(",");
+
+          return {
+            category: (cols[0] || "").trim(),
+            name: (cols[1] || "").trim(),
+            url: (cols[2] || "").trim()
+          };
+        }).filter(item => item.name);
+
+        const announcementRow = parsed.find(
+          item => item.category === "Announcement"
+        );
+
+        if (announcementRow) {
+          setAnnouncement(announcementRow.name);
+        }
+
+        setData(
+          parsed.filter(
+            item => item.category !== "Announcement"
+          )
+        );
+      });
+  }, []);
+
+  const categories = [...new Set(data.map(d => d.category))];
+
+  const colors = {
+    "IEP Resources": "#dcfce7",
+    "Forms": "#fef9c3",
+    "Compliance": "#d1fae5",
+    "Student Support": "#fee2e2",
+    "Assessments": "#dbeafe",
+    "Staff Resources": "#ecfccb"
+  };
+
+  return React.createElement(
+    "div",
+    {
+      style: {
+        background: "#f3f4f6",
+        minHeight: "100vh",
+        fontFamily: "Arial"
+      }
+    },
+
+    React.createElement(
+      "div",
+      {
+        style: {
+          background: "#166534",
+          color: "white",
+          padding: "16px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+        }
+      },
+
+      React.createElement(
+        "div",
+        null,
+
+        React.createElement(
+          "h1",
+          {
+            style: {
+              margin: 0,
+              fontSize: "22px"
+            }
+          },
+          "Special Ed Hub"
+        ),
+
+        React.createElement(
+          "div",
+          {
+            style: {
+              fontSize: "13px",
+              opacity: 0.9
+            }
+          },
+          "Special Education Department Resource Portal"
+        )
+      ),
+
+      React.createElement(
+        "div",
+        {
+          style: {
+            fontSize: "13px",
+            opacity: 0.85
+          }
+        },
+        "TMMS"
+      )
+    ),
+
+    React.createElement(
+      "div",
+      {
+        style: {
+          padding: "20px"
+        }
+      },
+
+      announcement &&
+        React.createElement(
+          "div",
+          {
+            style: {
+              background: "#15803d",
+              color: "white",
+              padding: "12px",
+              marginBottom: "20px",
+              borderRadius: "8px",
+              fontWeight: "bold"
+            }
+          },
+          "📢 " + announcement
+        ),
+
+      React.createElement(
+        "input",
+        {
+          placeholder: "🔍 Search resources...",
+          value: search,
+          onChange: e => setSearch(e.target
