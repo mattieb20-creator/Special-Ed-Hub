@@ -39,4 +39,178 @@ body {
 
 .search {
   width: 100%;
-  padding
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.card-title {
+  font-weight: bold;
+  background: #dcfce7;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.resource {
+  display: block;
+  background: #ecfdf5;
+  margin-bottom: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: black;
+}
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script>
+const { useState, useEffect } = React;
+
+function App() {
+  const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+
+  const SHEET_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTypzAOjtcZhAkEtdPvP11wlC01FS0AvIT40CfYBmNCMk7GvWEagoCtltqCjAedq49ycAfuDi8ZrF5P/pub?output=csv";
+
+  useEffect(() => {
+    fetch(SHEET_URL)
+      .then(response => response.text())
+      .then(text => {
+        const rows = text.trim().split("\n").slice(1);
+
+        const parsed = rows.map(row => {
+          const cols = row.split(",");
+
+          return {
+            category: (cols[0] || "").replace(/"/g, "").trim(),
+            name: (cols[1] || "").replace(/"/g, "").trim(),
+            url: (cols[2] || "").replace(/"/g, "").trim()
+          };
+        });
+
+        const announcementRow = parsed.find(
+          item => item.category === "Announcement"
+        );
+
+        if (announcementRow) {
+          setAnnouncement(announcementRow.name);
+        }
+
+        setData(
+          parsed.filter(
+            item => item.category !== "Announcement"
+          )
+        );
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
+
+  const categories = [...new Set(data.map(item => item.category))];
+
+  return React.createElement(
+    "div",
+    null,
+
+    React.createElement(
+      "div",
+      { className: "header" },
+      React.createElement("h1", null, "Special Ed Hub"),
+      React.createElement(
+        "div",
+        null,
+        "Special Education Department Resource Portal"
+      )
+    ),
+
+    React.createElement(
+      "div",
+      { className: "container" },
+
+      announcement &&
+        React.createElement(
+          "div",
+          { className: "announcement" },
+          "📢 " + announcement
+        ),
+
+      React.createElement("input", {
+        className: "search",
+        placeholder: "🔍 Search resources...",
+        value: search,
+        onChange: e => setSearch(e.target.value)
+      }),
+
+      React.createElement(
+        "div",
+        { className: "grid" },
+
+        categories.map(category =>
+          React.createElement(
+            "div",
+            {
+              className: "card",
+              key: category
+            },
+
+            React.createElement(
+              "div",
+              { className: "card-title" },
+              category
+            ),
+
+            data
+              .filter(item =>
+                item.category === category &&
+                item.name.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((item, index) =>
+                React.createElement(
+                  "a",
+                  {
+                    key: index,
+                    href: item.url,
+                    target: "_blank",
+                    className: "resource"
+                  },
+                  item.name
+                )
+              )
+          )
+        )
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(
+  document.getElementById("root")
+).render(
+  React.createElement(App)
+);
+</script>
+
+</body>
+</html>
