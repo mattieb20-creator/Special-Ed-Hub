@@ -19,7 +19,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [announcement, setAnnouncement] = useState("");
 
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1FX8dhDO-ldsgTIMsJc1Okw6RCCx2LORKd8hru7lv_sA/edit?gid=0#gid=0";
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTypzAOjtcZhAkEtdPvP11wlC01FS0AvIT40CfYBmNCMk7GvWEagoCtltqCjAedq49ycAfuDi8ZrF5P/pub?output=csv";
 
   useEffect(() => {
     fetch(SHEET_URL)
