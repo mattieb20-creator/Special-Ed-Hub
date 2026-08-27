@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Special Ed Hub</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+
+<body style="margin:0; font-family:Arial;">
+<div id="root"></div>
+
+<script>
+const { useState, useEffect } = React;
+
+function App() {
+  const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
+  const [announcement, setAnnouncement] = useState("");
+
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1FX8dhDO-ldsgTIMsJc1Okw6RCCx2LORKd8hru7lv_sA/edit?gid=0#gid=0";
+
+  useEffect(() => {
+    fetch(SHEET_URL)
+      .then(res => res.text())
+      .then(text => {
+        const rows = text.split("\n").slice(1);
+
+        const parsed = rows.map(row => {
+          const [category, name, url] = row.split(",");
+          return {
+            category: category?.trim(),
+            name: name?.trim(),
+            url: url?.trim()
+          };
+        }).filter(item => item.name);
+
+        const announce = parsed.find(item => item.category === "Announcement");
+        if (announce) setAnnouncement(announce.name);
+
+        const filtered = parsed.filter(item => item.category !== "Announcement");
+
+        setData(filtered);
+      });
+  }, []);
+
+  const categories = [...new Set(data.map(d => d.category))];
+
+  // 🎨 School-style color palette
+  const colors = {
+  "Student Systems": "#dcfce7",   // light green
+  "Curriculum": "#bbf7d0",        // brighter green
+  "Student Support": "#fecaca",   // soft red (keep contrast)
+  "Forms": "#fef9c3",             // soft yellow
+  "Staff Resources": "#d1fae5"    // mint green
+};
+
+  return React.createElement("div", {
+    style: {
+      fontFamily: "Arial",
+      background: "#f3f4f6",
+      minHeight: "100vh"
+    }
+  },
+
+    // ✅ SCHOOL HEADER (BRANDED)
+    React.createElement("div", {
+      style: {
+        background: "#166534",   // dark green
+        color: "white",
+        padding: "16px 20px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+      }
+    },
+      React.createElement("div", null,
+        React.createElement("h1", {
+          style: { margin: 0, fontSize: "20px" }
+        }, "TMMS Staff Hub"),
+
+        React.createElement("div", {
+          style: { fontSize: "13px", opacity: 0.9 }
+        }, "Thurgood Marshall Middle School • Staff Dashboard")
+      ),
+
+      React.createElement("div", {
+        style: { fontSize: "13px", opacity: 0.8 }
+      }, "Quick Access Portal")
+    ),
+
+    React.createElement("div", { style: { padding: "20px" } },
+
+      // ✅ ANNOUNCEMENT BAR (EMPHASIZED)
+      announcement && React.createElement("div", {
+        style: {
+          background: "#15803d",  // medium green
+          color: "white",
+          padding: "12px",
+          marginBottom: "20px",
+          borderRadius: "8px",
+          fontWeight: "bold"
+        }
+      }, "📢 " + announcement),
+
+      // ✅ SEARCH (clean + modern)
+      React.createElement("input", {
+        placeholder: "🔍 Search tools, systems, or resources...",
+        value: search,
+        onChange: e => setSearch(e.target.value),
+        style: {
+          width: "100%",
+          padding: "10px",
+          marginBottom: "20px",
+          borderRadius: "8px",
+          border: "1px solid #ccc",
+          fontSize: "14px"
+        }
+      }),
+
+      // ✅ GRID LAYOUT
+      React.createElement("div", {
+        style: {
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gap: "16px"
+        }
+      },
+
+        categories.map(cat =>
+          React.createElement("div", {
+            key: cat,
+            style: {
+              background: "white",
+              borderRadius: "12px",
+              padding: "15px",
+              boxShadow: "0 3px 8px rgba(0,0,0,0.1)"
+            }
+          },
+
+            // ✅ CATEGORY HEADER (colored tag)
+            React.createElement("div", {
+              style: {
+                background: colors[cat] || "#e5e7eb",
+                padding: "8px",
+                borderRadius: "6px",
+                fontWeight: "bold",
+                marginBottom: "10px"
+              }
+            }, cat),
+
+            // ✅ LINKS
+            data
+              .filter(d =>
+                d.category === cat &&
+                d.name.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((item, i) =>
+                React.createElement("button", {
+                  key: i,
+                  onClick: () => window.open(item.url),
+                  style: {
+                    display: "block",
+                    width: "100%",
+                    marginBottom: "6px",
+                    padding: "8px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: "#f3f4f6",
+                    cursor: "pointer",
+                    textAlign: "left"
+                  }
+                }, item.name)
+              )
+          )
+        )
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  React.createElement(App)
+);
+</script>
+
+</body>
+</html>
